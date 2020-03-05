@@ -41,10 +41,11 @@ namespace AuthenticationWebApi.Controllers
         public async Task<IActionResult> GetAll()
         {
             var usersCacheKey = "UsersCache";
-            var cahedUsers = await _distributedCache.GetStringAsync(usersCacheKey);
-            if (!string.IsNullOrEmpty(cahedUsers))
+            var cachedUsers = await _distributedCache.GetStringAsync(usersCacheKey);
+            // If user exists in the cache it will get from cache else it will get the user from database and add the users to the cache.
+            if (!string.IsNullOrEmpty(cachedUsers))
             {
-                return Ok(JsonConvert.DeserializeObject(cahedUsers) as IEnumerable<User>);
+                return Ok(JsonConvert.DeserializeObject<IEnumerable<User>>(cachedUsers));
             }
             else
             {

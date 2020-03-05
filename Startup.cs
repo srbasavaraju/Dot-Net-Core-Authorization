@@ -39,12 +39,19 @@ namespace AuthenticationWebApi
             services.AddEntityFrameworkNpgsql().AddDbContext<UsersContext>(opt =>
             opt.UseNpgsql(Configuration.GetConnectionString("MyWebApiConnectionString")));
 
-            // Registering the redis cache
-            services.AddDistributedRedisCache(option =>
+            // Registering mrmory cache
+            services.AddDistributedMemoryCache();
+
+            var redisSettings = Configuration.GetSection("RedisCacheOptions")["ConnectionString"];
+            // Add redis distributed cache
+            if (redisSettings != "")
             {
-                option.Configuration = "localhost:6379";
-                option.InstanceName = "master";
-            });
+                services.AddDistributedRedisCache(options =>
+                {
+                    options.Configuration = redisSettings;
+                    options.InstanceName = "MyCache:";
+                });
+            }
 
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -102,6 +109,7 @@ namespace AuthenticationWebApi
             {
                 endpoints.MapControllers();
             });
+
         }
     }
 }
